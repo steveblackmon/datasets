@@ -1,7 +1,5 @@
 package org.steveblackmon.googleapis.civicinfo
 
-import org.apache.spark.sql.Encoders
-
 object GoogleCivicOfficialsTaxonomyUtils {
 
 //  val DivisionEncoder = Encoders.kryo(classOf[Division])

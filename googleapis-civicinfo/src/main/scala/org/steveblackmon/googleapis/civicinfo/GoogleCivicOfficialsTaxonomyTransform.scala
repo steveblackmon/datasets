@@ -3,22 +3,20 @@ package org.steveblackmon.googleapis.civicinfo
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-import org.steveblackmon.utils.JuneauParsers
-import org.steveblackmon.utils.JuneauSerializers
-import org.apache.streams.config.ComponentConfigurator
-import org.slf4j.LoggerFactory
-
-import scala.util.Try
-import scala.util.Success
-import scala.util.Failure
 import org.apache.juneau.ObjectList
 import org.apache.juneau.ObjectMap
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.SparkSession
+import org.apache.streams.config.ComponentConfigurator
+import org.slf4j.LoggerFactory
+import org.steveblackmon.utils.JuneauParsers
+import org.steveblackmon.utils.JuneauSerializers
 
-import scala.collection.JavaConversions._
+import scala.util.Failure
+import scala.util.Success
+import scala.util.Try
 
 object GoogleCivicOfficialsTaxonomyTransform {
 
@@ -146,10 +144,10 @@ object GoogleCivicOfficialsTaxonomyTransform {
   }
 
   def representativeInfoByDivisionList_Officials(representativeInfoByDivision_json : String) : Iterator[OutputRow] = {
-    import org.apache.juneau.json.JsonParser
     import org.apache.juneau.ObjectList
     import org.apache.juneau.ObjectMap
-    import org.apache.juneau.utils.PojoRest
+    import org.apache.juneau.json.JsonParser
+
     import scala.collection.JavaConversions._
     import scala.collection.mutable.ListBuffer
     var outputList: ListBuffer[OutputRow] = ListBuffer()

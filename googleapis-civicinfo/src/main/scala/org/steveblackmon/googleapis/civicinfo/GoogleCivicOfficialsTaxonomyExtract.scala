@@ -5,8 +5,7 @@ import java.net.URLEncoder
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-import org.steveblackmon.utils.JuneauParsers
-import org.steveblackmon.utils.JuneauSerializers
+import com.typesafe.config.ConfigBeanFactory
 import org.apache.http.client.utils.URIBuilder
 import org.apache.juneau.ObjectMap
 import org.apache.juneau.json.JsonParser
@@ -15,21 +14,17 @@ import org.apache.juneau.rest.client.RestCall
 import org.apache.juneau.rest.client.RestClient
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.ScalaReflection
 import org.apache.spark.sql.types._
 import org.apache.streams.config.ComponentConfigurator
 import org.apache.streams.config.StreamsConfigurator
 import org.slf4j.LoggerFactory
-import org.steveblackmon.googleapis.civicinfo.GoogleCivicOfficialsTaxonomyExtract.OcdDivisionIdCsvRow
 import org.steveblackmon.googleapis.civicinfo.GoogleCivicOfficialsTaxonomyExtract.RepresentativeInfoByDivisionRequest
-import com.typesafe.config.ConfigBeanFactory
-import org.apache.spark.sql.Dataset
+import org.steveblackmon.utils.JuneauSerializers
 
-import scala.util.Try
 import scala.collection.JavaConversions._
+import scala.util.Try
 
 object GoogleCivicOfficialsTaxonomyExtract {
 
@@ -70,7 +65,6 @@ object GoogleCivicOfficialsTaxonomyExtract {
   def clean(json : String) : String = JsonSerializer.DEFAULT.serialize(JsonParser.DEFAULT.parse(json, classOf[ObjectMap]))
 
   def callRepresentativeInfoByDivision(req : RepresentativeInfoByDivisionRequest)(implicit googleCivicConfiguration : GoogleCivicConfiguration) : RepresentativeInfoByDivisionResponse = {
-    import scala.collection.JavaConversions._
     val id = URLEncoder.encode(req.ocdId, "UTF-8")
     val url = s"https://www.googleapis.com/civicinfo/v2/representatives/${id}"
     val uri : URI = new URIBuilder(url).build()
@@ -137,7 +131,6 @@ class GoogleCivicOfficialsTaxonomyExtract(
         ConfigBeanFactory.create (StreamsConfigurator.getConfig().getConfig(classOf[GoogleCivicOfficialsTaxonomyExtractRequest].getCanonicalName), classOf[GoogleCivicOfficialsTaxonomyExtractRequest] )
     )( implicit sparkSession : SparkSession ) extends Serializable with Runnable {
 
-  import GoogleCivicOfficialsTaxonomyUtils._
   import GoogleCivicOfficialsTaxonomyExtract.OcdDivisionIdCsvRow_schema
   import GoogleCivicOfficialsTaxonomyExtract.safeCallRepresentativeInfoByDivision
   import GoogleCivicOfficialsTaxonomyExtract.safeJsonToRepresentativeInfoByDivision

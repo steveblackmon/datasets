@@ -2,20 +2,15 @@ package org.steveblackmon.googleapis.civicinfo.test
 
 import java.io.File
 
-import com.typesafe.config.ConfigBeanFactory
 import com.typesafe.config.ConfigFactory
 import com.typesafe.config.ConfigRenderOptions
 import org.apache.juneau.json.JsonParser
-import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.SparkSession
 import org.apache.streams.config.StreamsConfigurator
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.steveblackmon.googleapis.civicinfo.GoogleCivicOfficialsTaxonomyExtract
-import org.steveblackmon.googleapis.civicinfo.GoogleCivicOfficialsTaxonomyExtract.OcdDivisionIdCsvRow_schema
 import org.steveblackmon.googleapis.civicinfo.GoogleCivicOfficialsTaxonomyExtractRequest
-import org.steveblackmon.googleapis.civicinfo.GoogleCivicOfficialsTaxonomyUtils
-import org.steveblackmon.googleapis.civicinfo.RepresentativeInfoByDivisionResponse
 import org.testng.Assert
 import org.testng.SkipException
 import org.testng.annotations.BeforeClass
@@ -28,8 +23,6 @@ class GoogleCivicOfficialsTaxonomyExtractIT {
   val master = StreamsConfigurator.getConfig.getString("spark.master")
 
   implicit final val session: SparkSession = SparkSession.builder().master(master).getOrCreate()
-
-  import session.implicits._
 
   val root = "target/test-classes/GoogleCivicOfficialsTaxonomyExtractIT"
 
@@ -55,8 +48,6 @@ class GoogleCivicOfficialsTaxonomyExtractIT {
   @Test
   @throws[Exception]
   def testGoogleCivicOfficialsTaxonomyExtract = {
-
-    import org.steveblackmon.utils.test.DatasetsTestUtils._
 
     val requestConfig = StreamsConfigurator.getConfig().getConfig(classOf[GoogleCivicOfficialsTaxonomyExtractRequest].getCanonicalName)
 
