@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "id": "#",
+  "javaType": "org.steveblackmon.googleapis.civicinfo.GoogleCivicOfficialsTaxonomyExtractResult",
+  "properties": {
+    "ocdIdentifiersCsvCount": {
+      "type": "integer"
+    }
+  }
+}

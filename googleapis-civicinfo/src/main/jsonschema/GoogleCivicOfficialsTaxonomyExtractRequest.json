@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "id": "#",
+  "javaType": "org.steveblackmon.googleapis.civicinfo.GoogleCivicOfficialsTaxonomyExtractRequest",
+  "properties": {
+    "ocdIdentifiersCsvPath": {
+      "type": "string"
+    },
+    "repinfoByDivisionMaxRequests": {
+      "type": "integer"
+    },
+    "repinfoExistingResponsesJsonlPath": {
+      "type": "string"
+    },
+    "repinfoNewResponsesJsonlPath": {
+      "type": "string"
+    }
+  }
+}
