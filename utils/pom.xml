@@ -5,12 +5,12 @@
 
     <groupId>org.steveblackmon</groupId>
     <artifactId>utils</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.1.0</version>
 
     <parent>
         <groupId>org.steveblackmon</groupId>
         <artifactId>datasets</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>0.1.0</version>
     </parent>
 
     <dependencies>
