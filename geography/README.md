@@ -1,14 +1,10 @@
-googleapis-civicinfo
+geography
 ====================
 
 ### Summary
 
 This project creates structured relational and/or graph datasets 
-with the information available through Google's CivicInfo API.
-
-[Civic Information API](https://developers.google.com/civic-information)
-
-[Civic Information API Docs](https://developers.google.com/civic-information/docs/v2/)
+with the information available from geonames.org and related sources.
 
 ### Building
 
@@ -17,29 +13,21 @@ Requirements:
 - Sources compilation require Apache Maven 3.3.9 or higher.
 
 ### Prerequisites:
-- GoogleCivic API token
-  * Google Cloud Account
-  * Google Cloud Project
-  
-[Using API Keys](https://cloud.google.com/docs/authentication/api-keys)  
-  
+- Files from [geonames.org](http://geonames.org)
+
 ### Modules
 
-#### [GoogleCivicOfficialsTaxonomyExtract]
+#### [TransformGeographySparkJob]
 
-Purpose: Extract raw data from api on a list of known ocd division identifiers
+Purpose: Transform raw data from geonames.org and related sources
 
 Inputs:
-- GoogleCivicOfficialsTaxonomyExtract requires a list of ocd division codes to work from.
-  * [ocdidentifiers](https://github.com/opencivicdata/ocd-division-ids) is a good source for this
+- TransformGeographySparkJob requires certain files from [geonames.org](http://download.geonames.org/export/dump/)
 
 Outputs:
-- Json-delimited files from the civic info getRepresentativeInfoByDivision
+- csv files
 
 Configuration:
-- Requires a GoogleCivic token
-  * org.steveblackmon.googleapis.civicinfo.GoogleCivicConfiguration.token)
-    
 - Requires an input path to ocd division codes
   * org.steveblackmon.googleapis.civicinfo.GoogleCivicOfficialsTaxonomyExtractRequest.ocdIdentifiersCsvPath
   
