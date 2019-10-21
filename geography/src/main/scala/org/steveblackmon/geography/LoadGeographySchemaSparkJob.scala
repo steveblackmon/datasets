@@ -4,6 +4,12 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.ScalaReflection
 import org.apache.spark.sql.types.StructType
 import org.apache.streams.config.StreamsConfigurator
+import org.steveblackmon.geography.output.CityRow
+import org.steveblackmon.geography.output.ContinentRow
+import org.steveblackmon.geography.output.CountryRow
+import org.steveblackmon.geography.output.CountyRow
+import org.steveblackmon.geography.output.PostalRow
+import org.steveblackmon.geography.output.StateRow
 
 object LoadGeographySchemaSparkJob {
 
@@ -13,57 +19,6 @@ object LoadGeographySchemaSparkJob {
 
   val rootconfig = StreamsConfigurator.getConfig
   lazy val config = rootconfig.getConfig(classOf[LoadGeographySchemaSparkJob].getCanonicalName)
-
-  case class ContinentRow(
-                           id : String,
-                           name : String
-                         )
-
-
-  case class CountryRow(
-                         id : Integer,
-                         code : String,
-                         name : String,
-                         continent_id : String
-                       )
-
-  case class StateRow(
-                       id : Integer,
-                       code : String,
-                       state_code : String,
-                       country_code : String,
-                       country_id : String,
-                       name : String
-                     )
-
-  case class CountyRow(
-                        id : Integer,
-                        code : String,
-                        country_id : Integer,
-                        state_id : Integer,
-                        name : String,
-                        fips : Integer
-                      )
-
-  case class PostalRow(
-                            id : Integer,
-                            name : String,
-                            country_id : Integer,
-                            state_id : Integer,
-                            county_id : Integer,
-                            latitude : Double,
-                            longitude : Double
-                          )
-
-  case class CityRow(
-                        id : Int,
-                        city : String,
-                        country_id : Integer,
-                        state_id : Integer,
-                        county_id : Integer,
-                        latitude : Double,
-                        longitude : Double
-                      )
 
   val continents_schema = ScalaReflection.schemaFor[ContinentRow].dataType.asInstanceOf[StructType]
   val countries_schema = ScalaReflection.schemaFor[CountryRow].dataType.asInstanceOf[StructType]

@@ -67,7 +67,7 @@ class GoogleCivicOfficialsTaxonomyTransformIT {
 
     Assert.assertNotEquals(job.officials_ds.count(), 0)
 
-    Assert.assertNotEquals(job.outputrows_df.count(), 0)
+    Assert.assertNotEquals(job.officials_outputrows_df.count(), 0)
 
     val officials_csv_out = session.read.csv(request.officialsCsvOutputPath)
     Assert.assertNotEquals(officials_csv_out.count(), 0)

@@ -55,7 +55,9 @@ object GoogleCivicOfficialsTaxonomyTransform {
 
   case class Official( name : String, party : String, photoUrl : Option[String], phones : List[String], emails : List[String], urls : List[String], twitter : Option[String], facebook : Option[String], youtube : Option[String] )
 
-  case class OutputRow( division : Division, geography : Geography, office : Office, official : Official )
+  case class OfficialOutputRow(division : Division, geography : Geography, office : Office, official : Official )
+
+  case class PrecinctOutputRow(division : Division, geography : Geography )
 
   def Entry_to_Division( e : java.util.Map.Entry[String, Object] ) : Division = {
     val id = e.getKey()
@@ -143,14 +145,14 @@ object GoogleCivicOfficialsTaxonomyTransform {
     geography
   }
 
-  def representativeInfoByDivisionList_Officials(representativeInfoByDivision_json : String) : Iterator[OutputRow] = {
+  def representativeInfoByDivisionList_Officials(representativeInfoByDivision_json : String) : Iterator[OfficialOutputRow] = {
     import org.apache.juneau.ObjectList
     import org.apache.juneau.ObjectMap
     import org.apache.juneau.json.JsonParser
 
     import scala.collection.JavaConversions._
     import scala.collection.mutable.ListBuffer
-    var outputList: ListBuffer[OutputRow] = ListBuffer()
+    var outputList: ListBuffer[OfficialOutputRow] = ListBuffer()
     Try {
       val root = JsonParser.DEFAULT.parse(representativeInfoByDivision_json, classOf[ObjectMap])
       val divisions = root.get("divisions", classOf[ObjectMap]).entrySet().toList
@@ -173,7 +175,7 @@ object GoogleCivicOfficialsTaxonomyTransform {
         println(s"division: ${division}")
         val geography = geographyFromOcdId(division.id)
         println(s"geography: ${geography}")
-        val out : OutputRow = OutputRow(division, geography, office, official)
+        val out : OfficialOutputRow = OfficialOutputRow(division, geography, office, official)
         println(s"out: ${out}")
         outputList += out
       }
@@ -202,11 +204,11 @@ class GoogleCivicOfficialsTaxonomyTransform(
 
   val repinfo_responses_json_rdd: RDD[String] = sparkContext.textFile(request.repinfoResponsesJsonlPath)
 
-  val officials_rdd: RDD[GoogleCivicOfficialsTaxonomyTransform.OutputRow] = repinfo_responses_json_rdd.flatMap(representativeInfoByDivisionList_Officials)
+  val officials_rdd: RDD[GoogleCivicOfficialsTaxonomyTransform.OfficialOutputRow] = repinfo_responses_json_rdd.flatMap(representativeInfoByDivisionList_Officials)
 
-  val officials_ds: Dataset[GoogleCivicOfficialsTaxonomyTransform.OutputRow] = officials_rdd.toDS
+  val officials_ds: Dataset[GoogleCivicOfficialsTaxonomyTransform.OfficialOutputRow] = officials_rdd.toDS
 
-  val outputrows_df: DataFrame = officials_ds.select(
+  val officials_outputrows_df: DataFrame = officials_ds.select(
     $"division.id".as("ocdId"),
     $"geography.country".as("country"),
     $"geography.state".as("state"),
@@ -225,8 +227,8 @@ class GoogleCivicOfficialsTaxonomyTransform(
     $"official.youtube"
   )
   override def run() = {
-    outputrows_df.coalesce(1).write.mode("overwrite").option("header", "true").option("quoteMode", "always").csv(request.officialsCsvOutputPath)
-    outputrows_df.coalesce(1).write.mode("overwrite").format("json").save(request.officialsJsonlOutputPath)
+    officials_outputrows_df.repartition(1).write.mode("overwrite").option("header", "true").option("quoteMode", "always").csv(request.officialsCsvOutputPath)
+    officials_outputrows_df.repartition(1).write.mode("overwrite").format("json").save(request.officialsJsonlOutputPath)
   }
 
 }

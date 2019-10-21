@@ -28,45 +28,27 @@ Outputs:
 - csv files
 
 Configuration:
-- Requires an input path to ocd division codes
-  * org.steveblackmon.googleapis.civicinfo.GoogleCivicOfficialsTaxonomyExtractRequest.ocdIdentifiersCsvPath
+- Requires paths to various geonames input files under org.steveblackmon.geography.TransformGeographySparkJob
+  * continents_csv_path
+  * countries_csv_path
+  * admin1codes_tsv_path
+  * admin2codes_tsv_path
+  * cities_csv_path
+  * postalcodes_tsv_path
   
-- Requires an output path for results
-  * org.steveblackmon.googleapis.civicinfo.GoogleCivicOfficialsTaxonomyExtractRequest.repinfoNewResponsesJsonlPath
-
-- Optional input path existing results that need not be re-requested
-  * org.steveblackmon.googleapis.civicinfo.GoogleCivicOfficialsTaxonomyExtractRequest.repinfoExistingResponsesJsonlPath
-
-- Optional maximum requests
-  * org.steveblackmon.googleapis.civicinfo.GoogleCivicOfficialsTaxonomyExtractRequest.repinfoByDivisionMaxRequests
-
-#### [GoogleCivicOfficialsTaxonomyTransform]
+#### [LoadGeographySchemaSparkJob]
 
 Purpose:
-Derive entities and relationships from all available outputs of GoogleCivicOfficialsTaxonomyExtract
+Load SQL database schema using outputs of TransformGeographySparkJob
  
 Inputs:
-- Requires an input path of GoogleCivicOfficialsTaxonomyExtract output file(s)
+- Requires an input path of TransformGeographySparkJob output file(s)
 
 Outputs:
 - Requires an output path for results
 
 Configuration:
-- List of entity types to write as csv
-- List of relationship types to write as csv
-
-#### [GoogleCivicOfficialsTaxonomyLoadDataDotWorld]
-
-Purpose:
-Upload generated Entity and Relationship Data to data.world
-
-#### [GoogleCivicOfficialsTaxonomyLoadNeo4j]
-
-#### [GoogleCivicOfficialsTaxonomyLoadPostgres]
-
-Purpose:
-Create relational database from generated Entity and Relationship Data
-
-#### [GoogleCivicOfficialsTaxonomyLoadTurtle]
+- JDBC details
+- Table names
 
 ### References

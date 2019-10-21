@@ -1,31 +1,30 @@
 package org.steveblackmon.geography
 
 import org.apache.spark.serializer.KryoSerializer
-import org.steveblackmon.geography.LoadGeographySchemaSparkJob.ContinentRow
-import org.steveblackmon.geography.LoadGeographySchemaSparkJob.CountryRow
-import org.steveblackmon.geography.LoadGeographySchemaSparkJob.CityRow
-import org.steveblackmon.geography.LoadGeographySchemaSparkJob.CountyRow
-import org.steveblackmon.geography.LoadGeographySchemaSparkJob.PostalRow
-import org.steveblackmon.geography.LoadGeographySchemaSparkJob.StateRow
-import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.ScalaReflection
-import org.apache.spark.sql.geosparksql.expressions.ST_Point
 import org.apache.spark.sql.types.StructType
 import org.apache.streams.config.StreamsConfigurator
-import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.datasyslab.geosparksql.UDF.UdfRegistrator
+import org.steveblackmon.geography.input.geonames.Admin1CodesTsvRow
+import org.steveblackmon.geography.input.geonames.Admin2CodesTsvRow
+import org.steveblackmon.geography.input.geonames.CityCsvRow
+import org.steveblackmon.geography.input.geonames.ContinentCsvRow
+import org.steveblackmon.geography.input.geonames.CountryCsvRow
+import org.steveblackmon.geography.input.geonames.PostalCodesTsvRow
+import org.steveblackmon.geography.output.CityRow
+import org.steveblackmon.geography.output.ContinentRow
+import org.steveblackmon.geography.output.CountryRow
+import org.steveblackmon.geography.output.CountyRow
+import org.steveblackmon.geography.output.PostalRow
+import org.steveblackmon.geography.output.StateRow
 object TransformGeographySparkJob {
 
   val LOGGER: Logger = LoggerFactory.getLogger(classOf[TransformGeographySparkJob])
 
-  val sparkSession = SparkSession.builder()
-    .config("spark.serializer", classOf[KryoSerializer].getName)
-    .config("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getName)
-    .getOrCreate()
+  val sparkSession = SparkSession.builder().getOrCreate()
 
   val sparkContext = sparkSession.sparkContext
   val sqlContext = sparkSession.sqlContext
@@ -35,98 +34,17 @@ object TransformGeographySparkJob {
 
   import sparkSession.implicits._
 
-  case class ContinentCsvRow(
-                              Code : String,
-                              Name : String
-                            )
-
   val continents_csv_schema = ScalaReflection.schemaFor[ContinentCsvRow].dataType.asInstanceOf[org.apache.spark.sql.types.StructType]
-
-  case class CountryCsvRow(
-                            ISO : String,
-                            ISO3 : String,
-                            `ISO-Numeric` : Int,
-                            fips : String,
-                            Country : String,
-                            Capital : String,
-                            `Area(in sq km)` : Double,
-                            Population : Int,
-                            Continent : String,
-                            tld : String,
-                            CurrencyCode : String,
-                            CurrencyName : String,
-                            Phone : String,
-                            `Postal Code Format` : String,
-                            `Postal Code Regex` : String,
-                            Languages : String,
-                            geonameid : Int,
-                            neighbours : String,
-                            EquivalentFipsCode : String
-                          )
 
   val countries_csv_schema = ScalaReflection.schemaFor[CountryCsvRow].dataType.asInstanceOf[StructType]
 
-  case class Admin1CodesTsvRow(
-                                `code` : String,
-                                `name` : String,
-                                asciiname : String,
-                                geonameId : Integer
-                              )
-
   val admin1codes_tsv_schema = ScalaReflection.schemaFor[Admin1CodesTsvRow].dataType.asInstanceOf[StructType]
-
-  case class Admin2CodesTsvRow(
-                                `concatenated` : String,
-                                `country_code` : String,
-                                `state_code` : String,
-                                name : String,
-                                asciiname : String,
-                                geonameId : Integer
-                              )
 
   val admin2codes_tsv_schema = ScalaReflection.schemaFor[Admin2CodesTsvRow].dataType.asInstanceOf[StructType]
 
-  case class CityCsvRow(
-    geonameid : Int,
-    name : String,
-    asciiname : String,
-    alternatenames : String,
-    latitude: Double,
-    longitude: Double,
-    `feature class` : String,
-    `feature code` : String,
-    `country code` : String,
-    cc2 : String,
-    `admin1 code` : String,
-    `admin2 code` : String,
-    `admin3 code` : String,
-    `admin4 code` : String,
-    population : Int,
-    elevation : Int,
-    dem : Int,
-    timezone : String
-  )
-
   val cities_csv_schema = ScalaReflection.schemaFor[CityCsvRow].dataType.asInstanceOf[StructType]
 
-  case class PostalCodesTsvRow(
-                                `country code` : String,
-                                `postal code` : String,
-                                `place name` : String,
-                                `admin name1` : String,
-                                `admin code1` : String,
-                                `admin name2` : String,
-                                `admin code2` : String,
-                                `admin name3` : String,
-                                `admin code3` : String,
-                                latitude : Double,
-                                longitude : Double,
-                                accuracy : Integer
-                              )
-
   val postalcodes_tsv_schema = ScalaReflection.schemaFor[PostalCodesTsvRow].dataType.asInstanceOf[StructType]
-
-  case class GeonamePoint( geonameid : Int, center : ST_Point, radius : Double)
 
   def continents_csv_ds_to_continents_db(input : Dataset[ContinentCsvRow]) : Dataset[ContinentRow] = {
     input.map(row => ContinentRow(row.Code, row.Name))
@@ -141,8 +59,6 @@ object TransformGeographySparkJob {
 class TransformGeographySparkJob extends Runnable with java.io.Serializable {
 
   import TransformGeographySparkJob._
-
-  import org.apache.spark.sql.catalyst.expressions._
 
   val sparkSession = SparkSession.builder().getOrCreate()
 
@@ -299,14 +215,14 @@ class TransformGeographySparkJob extends Runnable with java.io.Serializable {
     orderBy(desc("population")).
     limit(5000)
 
-  val markets_join_df = topcities_csv_ds.
+  val cities_join_df = topcities_csv_ds.
     join(countries_db, cities_csv_ds("country code") === countries_db("code") ).
     withColumn("state_concat", concat(topcities_csv_ds("country code"), lit("."), topcities_csv_ds("admin1 code"))).
     join(states_db, $"state_concat" === states_db("code") ).
     withColumn("county_concat", concat(topcities_csv_ds("country code"), lit("."), topcities_csv_ds("admin1 code"), lit("."), topcities_csv_ds("admin2 code"))).
     join(counties_db, $"county_concat" === counties_db("code"), "outer")
 
-  val cities_db = markets_join_df.
+  val cities_db = cities_join_df.
     select(
       cities_csv_ds("geonameid").as("id"),
       cities_csv_ds("name").as("city"),
@@ -317,24 +233,6 @@ class TransformGeographySparkJob extends Runnable with java.io.Serializable {
       cities_csv_ds("longitude").as("longitude")
     ).filter($"id".isNotNull).as[CityRow]
   cities_db.persist().createOrReplaceTempView("cities_db")
-
-  val cities_points_ds: Dataset[GeonamePoint] = cities_db.
-    filter(cities_db("id").isNotNull).
-    select(
-      cities_db("id").as("geonameid"),
-      ST_Point(cities_db("latitude"), cities_db("longitude")).as("center"),
-      lit(.5).as("radius")
-    ).as[GeonamePoint]
-  cities_points_ds.persist().createOrReplaceTempView("cities_points_ds")
-
-  val postals_points_ds: Dataset[GeonamePoint] = postalcodes_db.
-    filter(postalcodes_db("id").isNotNull).
-    select(
-      postalcodes_db("id").as("geonameid"),
-      ST_Point(postalcodes_db("latitude").cast("Decimal"), postalcodes_db("longitude").cast("Decimal")).as("center"),
-      lit(.2).as("radius")
-    ).as[GeonamePoint]
-  postals_points_ds.persist().createOrReplaceTempView("postals_points_ds")
 
   override def run() = {
 
