@@ -25,7 +25,7 @@
     <jena.version>3.10.0</jena.version>
     <jline.version>2.14.3</jline.version>
     <juneau.version>8.0.0</juneau.version>
-    <junit.version>4.11</junit.version>
+    <junit.version>4.13.1</junit.version>
     <log4j.version>1.2.16</log4j.version>
     <logback.version>1.2.3</logback.version>
     <netty.version>4.1.17.Final</netty.version>
